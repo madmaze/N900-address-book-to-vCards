@@ -15,11 +15,12 @@ def readDBFile(filename):
     infile = f.read()
     f.close()
     # substitute newlines
-    infile = infile.replace(r'\0d\0a', '\r\n')
+    infile = infile.replace(r'\0d\0a', '\n')
     return infile
 
 def createVcards(contacts):
     for i,vcard in enumerate(contacts):
+    	#print vcard
         vcard = vcard.strip()
         out = ''
         for line in vcard.splitlines(True):
@@ -37,14 +38,28 @@ def createVcards(contacts):
         f.close()
 
 def main():
-    
-    contacts = readDBFile("contacts_20111202.vcf")
-    ## split at \00
-    contacts = contacts.split(r'\00')
-    ## every other contains only an ID
-    contacts = contacts[1:-1:2]
-
-    createVcards(contacts)
+    if (len(sys.argv) == 2):
+    	    
+    	    contacts = readDBFile(sys.argv[1])
+    	    contacts = contacts.split('END:VCARD')
+    	    f = open('out.vcf', 'w')
+    	    for vc in contacts:
+    	    	    try:
+    	    	    	    if vc.find("@reply.facebook.com")==-1:
+    	    	    	    	    print "BEGIN:VCARD"+vc.split('BEGIN:VCARD')[1]+"END:VCARD"
+    	    	    	    	    f.write("BEGIN:VCARD"+vc.split('BEGIN:VCARD')[1]+"END:VCARD\n")
+    	    	    except:
+    	    	    	    print ""
+	    ## split at \00
+	    ##contacts = contacts.split(r'\00')
+	    ## every other contains only an ID
+	    #contacts = contacts[1:-1:2]
+	    f.close()
+	    print len(contacts)
+	
+	    ##createVcards(contacts)
+    else:
+    	    print "Usage: "+sys.argv[0]+" addressbook.db"
 
 if __name__ == "__main__":
     main()
